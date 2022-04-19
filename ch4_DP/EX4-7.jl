@@ -1,5 +1,5 @@
 import Pkg; 
-Pkg.add("Distributions")
+# Pkg.add("Distributions")
 using Random, Plots, Distributions, Statistics
 
 n = 20
@@ -9,12 +9,13 @@ b = 10  # Poisson upper bound
 θ = 0.1
 V = zeros(Float64, k, k)
 PI = zeros(Int64, k, k)
+iter_num = 0
 
 # day rental probility at location A and B for one day
 A_rp =
-    [(j - i, i, pdf(Poisson(3), i) * pdf(Poisson(4), j)) for i = 0:b, j = 0:b]
+    [(j - i, i, pdf(Poisson(3), i) * pdf(Poisson(3), j)) for i = 0:b, j = 0:b]
 B_rp =
-    [(j - i, i, pdf(Poisson(3), i) * pdf(Poisson(2), j)) for i = 0:b, j = 0:b]
+    [(j - i, i, pdf(Poisson(4), i) * pdf(Poisson(2), j)) for i = 0:b, j = 0:b]
 
 # day rental at the end of day with a given number of cars
 # return element: (car number delta, number of cars rent out, probility)
@@ -60,7 +61,9 @@ function value_eval(A, B, orig_act)
 end
 
 function policy_evaluation()
-    global n, k, γ, θ, V, PI, A_rp, B_rp
+    global n, k, γ, θ, V, PI, A_rp, B_rp, iter_num
+    iter_num = iter_num + 1
+    @show iter_num
 
     while true
         delta = 0.0
@@ -114,5 +117,7 @@ while !policy_improvement()
 end
 
 # draw plot for V and π
-heatmap(V)
-heatmap(PI)
+Plots.plot(heatmap(V))
+Plots.savefig("images/4-7-V.png")
+Plots.plot(heatmap(PI))
+Plots.savefig("images/4-7-PI.png")

@@ -13,7 +13,7 @@ using Random, Plots, Distributions, Statistics, StatsBase
 rows, cols = 32, 17
 
 ε = 0.1
-γ = 1
+# γ = 1
 
 # action can be horizontal and vertical with value 0, 1 or -1
 # represented by 1 to 9
@@ -156,7 +156,7 @@ function make_trajectory(ε; noise=true)
     end
 end
 
-function run_episode(T)
+function run_episode(T, γ)
     G, W, R = 0.0, 1.0, -1
 
     for t = T:-1:1
@@ -193,20 +193,28 @@ end
 
 function main()
     episode_num = 10^5
-    rewards = []
 
-    for i = 1:episode_num
-        T = make_trajectory(ε)
-        t = run_episode(T)
-        println("episode $(i): $(T), $(t), $(T-t)")
+    γ_set = [0.1, 0.3, 0.5, 0.75, 1]
+    rewards_set = []
+    for k in 1:5
+        γ = γ_set[k]
+        rewards = []
 
-        if i % 9 == 0
-            T = make_trajectory(0.0)
-            push!(rewards, -1 * T)
+        for i = 1:episode_num
+            T = make_trajectory(ε)
+            t = run_episode(T, γ)
+            println("episode $(i): $(T), $(t), $(T-t)")
+
+            if i % 9 == 0
+                T = make_trajectory(0.0)
+                push!(rewards, -1 * T)
+            end
         end
+
+        push!(rewards_set, rewards)
     end
 
-    Plots.plot(rewards)
+    Plots.plot(rewards_set, label=["gamma=0.1" "gamma=0.3" "gamma=0.5" "gamma=0.75" "gamma=1"])
     Plots.savefig("images/rewards.png")
 
     output_trajectories()
